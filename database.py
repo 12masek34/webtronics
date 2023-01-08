@@ -9,6 +9,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     MetaData,
+    UniqueConstraint,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
@@ -56,3 +57,4 @@ class User(Base):
     id = Column(Integer(), primary_key=True)
     username = Column(String(128), nullable=False)
     hashed_password = Column(String(128), nullable=False)
+    __table_args__ = (UniqueConstraint('username', 'hashed_password', name='name_password__uc'),)
