@@ -28,7 +28,7 @@ load_dotenv()
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))
 
 
-@app.post('/create', description='Register the User')
+@app.post('/create')
 async def user_create(user: UserCreate,
                       db: Session = Depends(get_db)) -> UserCreate:
     """
