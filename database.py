@@ -57,4 +57,4 @@ class User(Base):
     id = Column(Integer(), primary_key=True)
     username = Column(String(128), nullable=False)
     hashed_password = Column(String(128), nullable=False)
-    __table_args__ = (UniqueConstraint('username', 'hashed_password', name='name_password__uc'),)
+    __table_args__ = (UniqueConstraint('username', name='name__uc'),)
