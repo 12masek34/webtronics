@@ -98,10 +98,11 @@ async def delete_post_by_id(
         db: Session = Depends(get_db),
 ) -> DeletePostSchema:
     """
-    Delete post.
+    Delete your post.
     """
     try:
-        post = db.query(Post).filter(Post.id == post_id).one()
+        post = db.query(Post).filter(Post.id == post_id,
+                                     Post.author_id == current_user.id).one()
     except NoResultFound:
         raise HTTPException(status_code=404, detail='post not found')
     db.delete(post)
@@ -117,10 +118,11 @@ async def patch_post_by_id(
         db: Session = Depends(get_db),
 ) -> PostSchema:
     """
-    Patch post.
+    Patch your post.
     """
     try:
-        post = db.query(Post).filter(Post.id == post_id).one()
+        post = db.query(Post).filter(Post.id == post_id,
+                                     Post.author_id == current_user.id).one()
     except NoResultFound:
         raise HTTPException(status_code=404, detail='post not found')
     post.text = patch_text
