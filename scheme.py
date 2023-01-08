@@ -24,3 +24,22 @@ class UserSchema(BaseModel):
 
 class UserInDB(UserSchema):
     hashed_password: str
+
+    class Config:
+        orm_mode = True
+
+
+class PostSchema(BaseModel):
+    id: int
+    author_id: int
+    text: str
+
+    class Config:
+        orm_mode = True
+
+
+class DeletePostSchema(BaseModel):
+    id: int
+
+    class Config:
+        orm_mode = True

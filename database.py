@@ -2,6 +2,7 @@ import os
 from typing import Iterator
 
 from sqlalchemy import (
+    Text,
     create_engine,
     Column,
     String,
@@ -12,7 +13,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session, backref, relationship, sessionmaker
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -57,4 +58,15 @@ class User(Base):
     id = Column(Integer(), primary_key=True)
     username = Column(String(128), nullable=False)
     hashed_password = Column(String(128), nullable=False)
+    posts = relationship('Post', backref='author')
     __table_args__ = (UniqueConstraint('username', name='name__uc'),)
+
+
+class Post(Base):
+    """
+    Post model.
+    """
+    __tablename__ = 'post'
+    id = Column(Integer(), primary_key=True)
+    author_id = Column(Integer, ForeignKey('user_.id'))
+    text = Column(Text)

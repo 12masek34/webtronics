@@ -5,8 +5,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 
-from database import User, get_db
-from scheme import UserCreate, UserInDB, UserSchema
+from database import Post, User, get_db
+from scheme import DeletePostSchema, PostSchema, UserCreate, UserInDB, UserSchema
 from services import create_access_token, create_hash_password, get_current_user
 
 
@@ -51,12 +51,70 @@ async def login(data: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
     return {'access_token': access_token, 'token_type': 'bearer'}
 
 
-@app.get('/users/me/', response_model=UserInDB)
-async def read_users_me(current_user: User = Depends(get_current_user)):
+@app.get('/users/me/')
+async def read_users_me(current_user: User = Depends(get_current_user)) -> UserInDB:
     """
     Check me.
     """
-    return UserInDB(
-        username=current_user.username,
-        hashed_password=current_user.hashed_password,
-    )
+    return current_user
+
+
+@app.post('/create-post')
+async def create_post(
+        text: str,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
+) -> PostSchema:
+    """
+    Create post by auth user.
+    """
+    post = Post(author_id=current_user.id, text=text)
+    db.add(post)
+    db.commit()
+    return post
+
+
+@app.get('/list-posts')
+async def list_all_posts(db: Session = Depends(get_db)) -> list[PostSchema]:
+    """
+    List all posts.
+    """
+    return db.query(Post).all()
+
+
+@app.delete('/delete-post')
+async def delete_post_by_id(
+        post_id: int,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
+) -> DeletePostSchema:
+    """
+    Delete post.
+    """
+    try:
+        post = db.query(Post).filter(Post.id == post_id).one()
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail='post not found')
+    db.delete(post)
+    db.commit()
+    return post
+
+
+@app.patch('/patch-post')
+async def patch_post_by_id(
+        post_id: int,
+        patch_text: str,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
+) -> PostSchema:
+    """
+    Patch post.
+    """
+    try:
+        post = db.query(Post).filter(Post.id == post_id).one()
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail='post not found')
+    post.text = patch_text
+    db.add(post)
+    db.commit()
+    return post
