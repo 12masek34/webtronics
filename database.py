@@ -47,7 +47,6 @@ def create_db():
     Create db.
     """
     Base.metadata.create_all(engine)
-    # Base.metadata.drop_all(engine)
 
 
 class User(Base):
@@ -70,3 +69,12 @@ class Post(Base):
     id = Column(Integer(), primary_key=True)
     author_id = Column(Integer, ForeignKey('user_.id'))
     text = Column(Text)
+    likes = relationship('User', secondary='post_like',
+                            backref=backref('post', lazy='dynamic'))
+
+
+class PostLike(Base):
+    __tablename__ = 'post_like'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user_.id'))
+    post_id = Column(Integer, ForeignKey('post.id'))

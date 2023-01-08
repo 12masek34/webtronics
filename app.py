@@ -5,8 +5,16 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 
-from database import Post, User, get_db
-from scheme import DeletePostSchema, PostSchema, UserCreate, UserInDB, UserSchema
+from database import Post, PostLike, User, get_db
+from scheme import (
+    DeletePostSchema,
+    PostLikeSchema,
+    PostSchema,
+    UserCreate,
+    UserInDB,
+    UserPostLikeSchema,
+    UserSchema,
+)
 from services import create_access_token, create_hash_password, get_current_user
 
 
@@ -15,7 +23,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))
 
 
 @app.post('/create', description='Register the User')
-async def user_create(user: UserCreate,  db: Session = Depends(get_db)) -> UserCreate:
+async def user_create(user: UserCreate,
+                      db: Session = Depends(get_db)) -> UserCreate:
     """
     Registration user.
     """
@@ -30,7 +39,8 @@ async def user_create(user: UserCreate,  db: Session = Depends(get_db)) -> UserC
 
 
 @app.post('/token')
-async def login(data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def login(data: OAuth2PasswordRequestForm = Depends(),
+                db: Session = Depends(get_db)):
     """
     Get token.
     """
@@ -47,11 +57,10 @@ async def login(data: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
     access_token = create_access_token(
         data={'sub': user.username}, expires_delta=access_token_expires
     )
-
     return {'access_token': access_token, 'token_type': 'bearer'}
 
 
-@app.get('/users/me/')
+@app.get('/users/me')
 async def read_users_me(current_user: User = Depends(get_current_user)) -> UserInDB:
     """
     Check me.
@@ -118,3 +127,40 @@ async def patch_post_by_id(
     db.add(post)
     db.commit()
     return post
+
+
+@app.post('/like-post')
+async def like_post_by_id(
+        post_id: int,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
+) -> PostLikeSchema:
+    """
+    Like some post.
+    """
+    try:
+        post = db.query(Post).filter(Post.id == post_id).one()
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail='post not found')
+    if post.author_id == current_user.id:
+        raise HTTPException(status_code=400, detail='you cannot like your post')
+    post_like = PostLike(user_id=current_user.id, post_id=post.id)
+    db.add(post_like)
+    db.commit()
+    return post_like
+
+
+@app.get('/check-likes/{post_id}')
+async def check_likes_post_by_id(
+        post_id: int,
+        db: Session = Depends(get_db)) -> list[UserPostLikeSchema]:
+    """
+    Check, who like this post.
+    """
+    user_ids = db.scalars(
+        db.query(PostLike.user_id).filter(PostLike.post_id == post_id)).all()
+    if not user_ids:
+        raise HTTPException(
+            status_code=404, detail=f'liks by post id == {post_id} not found.')
+    users = db.query(User).filter(User.id.in_(user_ids)).all()
+    return users

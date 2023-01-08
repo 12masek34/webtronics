@@ -10,6 +10,9 @@ class UserCreate(BaseModel):
 
 
 class Token(BaseModel):
+    """
+    Token schema.
+    """
     access_token: str
     token_type: str
 
@@ -40,6 +43,22 @@ class PostSchema(BaseModel):
 
 class DeletePostSchema(BaseModel):
     id: int
+
+    class Config:
+        orm_mode = True
+
+
+class PostLikeSchema(BaseModel):
+    user_id: int
+    post_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class UserPostLikeSchema(BaseModel):
+    id: int
+    username: str
 
     class Config:
         orm_mode = True
