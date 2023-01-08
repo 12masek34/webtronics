@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from database import User, get_db
 from scheme import TokenData
 
+
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM')

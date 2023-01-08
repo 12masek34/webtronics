@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.exc import IntegrityError, NoResultFound
@@ -15,10 +16,15 @@ from scheme import (
     UserPostLikeSchema,
     UserSchema,
 )
-from services import create_access_token, create_hash_password, get_current_user
+from services import (
+    create_access_token,
+    create_hash_password,
+    get_current_user,
+)
 
 
 app = FastAPI()
+load_dotenv()
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))
 
 
