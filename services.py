@@ -20,7 +20,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
 
 def create_hash_password(password: str) -> str:
     """
-    Hashing paswword.
+    Hashing password.
     """
     hash_maker = hashlib.new('sha256')
     hash_maker.update(password.encode())
