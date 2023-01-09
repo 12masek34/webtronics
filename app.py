@@ -54,8 +54,6 @@ async def login(data: OAuth2PasswordRequestForm = Depends(),
         user = db.query(User).filter(User.username == data.username).one()
     except NoResultFound:
         raise HTTPException(status_code=404, detail='user not found')
-    if not user:
-        raise HTTPException(status_code=400, detail='Incorrect username or password')
     hashed_password = create_hash_password(data.password)
     if not hashed_password == user.hashed_password:
         raise HTTPException(status_code=400, detail='Incorrect username or password')
