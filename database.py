@@ -7,7 +7,6 @@ from sqlalchemy import (
     Column,
     String,
     Integer,
-    DateTime,
     ForeignKey,
     MetaData,
     UniqueConstraint,
@@ -70,10 +69,13 @@ class Post(Base):
     author_id = Column(Integer, ForeignKey('user_.id'))
     text = Column(Text)
     likes = relationship('User', secondary='post_like',
-                            backref=backref('post', lazy='dynamic'))
+                         backref=backref('post', lazy='dynamic'))
 
 
 class PostLike(Base):
+    """
+    Likes model.
+    """
     __tablename__ = 'post_like'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user_.id'))
