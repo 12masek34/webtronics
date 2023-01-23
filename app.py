@@ -170,3 +170,5 @@ async def check_likes_post_by_id(
             status_code=404, detail=f'liks by post id == {post_id} not found.')
     users = db.query(User).filter(User.id.in_(user_ids)).all()
     return users
+
+# aaa
